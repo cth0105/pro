@@ -1223,6 +1223,13 @@ function renderResult(result) {
   ].join("\n");
 }
 
+function scrollToResult() {
+  resultCard.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
 function renderHistory() {
   const history = getHistory();
   historyList.innerHTML = "";
@@ -1364,6 +1371,7 @@ dreamForm.addEventListener("submit", async (event) => {
   result.selectedOptionIds = selectedOptions.map((option) => option.id);
   result.dream = text;
   renderResult(result);
+  scrollToResult();
   if (saveHistoryInput.checked) {
     setHistory([result, ...getHistory()]);
     renderHistory();
