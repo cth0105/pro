@@ -27,12 +27,6 @@
       </nav>
     </header>
 
-    <aside class="ad-slot top-ad" aria-label="상단 광고 영역">
-      <span>광고</span>
-      <strong>상단 광고 영역</strong>
-      <p>애드센스 승인 후 반응형 광고 코드를 이 위치에 넣을 수 있습니다.</p>
-    </aside>
-
     <main class="app-shell" id="dream-app">
       <section class="composer" aria-labelledby="app-title">
         <div class="brand-row">
@@ -40,52 +34,126 @@
             <p class="eyebrow">Dream Journal</p>
             <h1 id="app-title">꿈해몽 노트</h1>
           </div>
-          <button class="ghost-button" id="clearHistoryButton" type="button">기록 비우기</button>
+          <button class="ghost-button" id="resetButton" type="button">선택 초기화</button>
         </div>
 
         <form id="dreamForm" class="dream-form">
-          <label for="dreamInput">오늘 기억나는 꿈</label>
-          <textarea
-            id="dreamInput"
-            name="dream"
-            rows="8"
-            placeholder="예: 낯선 역에서 기차를 기다리는데, 하늘에서 비가 아주 조용히 내렸어요."
-            required
-          ></textarea>
+          <div class="form-intro">
+            <h2>무료 키워드 해석</h2>
+            <p>꿈에서 기억나는 단서를 단계별로 골라보세요. 선택한 장소, 분위기, 대상, 행동을 바탕으로 상징 해석을 정리합니다.</p>
+          </div>
 
-          <fieldset>
-            <legend>꿈에서 가장 강했던 감정</legend>
+          <div class="step-progress" aria-live="polite">
+            <div>
+              <span class="step-kicker">현재 단계</span>
+              <strong id="stepTitle">장소 <small>1/6</small></strong>
+            </div>
+            <div class="step-meter" aria-hidden="true">
+              <span id="stepMeterFill"></span>
+            </div>
+          </div>
+
+          <fieldset class="step-panel active" data-step="0">
+            <div class="fieldset-heading">
+              <legend>장소</legend>
+              <span id="placeCategoryCount" class="limit-hint">큰 분류 최대 2개</span>
+            </div>
+            <p class="field-help">꿈이 펼쳐진 공간을 먼저 골라주세요. 정확하지 않아도 가장 가까운 곳이면 충분합니다.</p>
+            <div class="chip-grid" id="placeCategoryOptions"></div>
+            <div class="subchoice-panel" id="placeDetailPanel">
+              <div class="fieldset-heading">
+                <strong>세부 장소</strong>
+                <span id="placeCount" class="limit-hint">최대 2개</span>
+              </div>
+              <div class="chip-grid clue-grid" id="placeOptions"></div>
+            </div>
+          </fieldset>
+
+          <fieldset class="step-panel" data-step="1">
+            <legend>가장 남은 감정</legend>
+            <p class="field-help">꿈에서 깬 뒤 가장 또렷하게 남은 감정을 하나 골라주세요.</p>
             <div class="chip-grid" id="moodGroup">
               <label><input type="radio" name="mood" value="평온함" checked />평온함</label>
               <label><input type="radio" name="mood" value="불안함" />불안함</label>
               <label><input type="radio" name="mood" value="기쁨" />기쁨</label>
               <label><input type="radio" name="mood" value="그리움" />그리움</label>
               <label><input type="radio" name="mood" value="혼란스러움" />혼란스러움</label>
+              <label><input type="radio" name="mood" value="무서움" />무서움</label>
+              <label><input type="radio" name="mood" value="답답함" />답답함</label>
+              <label><input type="radio" name="mood" value="설렘" />설렘</label>
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend>해석 톤</legend>
-            <div class="chip-grid" id="toneGroup">
-              <label><input type="radio" name="tone" value="balanced" checked />기본형</label>
-              <label><input type="radio" name="tone" value="short" />짧게</label>
-              <label><input type="radio" name="tone" value="detail" />자세히</label>
-              <label><input type="radio" name="tone" value="comfort" />위로형</label>
-              <label><input type="radio" name="tone" value="practical" />현실 조언형</label>
+          <fieldset class="step-panel" data-step="2">
+            <div class="fieldset-heading">
+              <legend>등장한 대상</legend>
+              <span id="targetCategoryCount" class="limit-hint">큰 분류 최대 3개</span>
+            </div>
+            <p class="field-help">꿈에서 눈에 띄었던 사람, 동물, 물건, 상징을 골라주세요.</p>
+            <div class="chip-grid" id="targetCategoryOptions"></div>
+            <div class="subchoice-panel" id="targetDetailPanel">
+              <div class="fieldset-heading">
+                <strong>세부 대상</strong>
+                <span id="targetDetailCount" class="limit-hint">최대 3개</span>
+              </div>
+              <div class="chip-grid clue-grid" id="targetDetailOptions"></div>
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend>해석 방식</legend>
-            <div class="chip-grid" id="engineGroup">
-              <label><input type="radio" name="engine" value="keyword" checked />키워드 해석</label>
-              <label><input type="radio" name="engine" value="ai" />AI 해석</label>
+          <fieldset class="step-panel" data-step="3">
+            <div class="fieldset-heading">
+              <legend>행동/사건</legend>
+              <span id="actionCategoryCount" class="limit-hint">큰 분류 최대 3개</span>
             </div>
-            <p class="field-help">AI 해석은 배포 사이트에서 OpenAI API 키가 설정된 경우에만 작동합니다.</p>
+            <p class="field-help">꿈에서 실제로 벌어진 일이나 내 행동에 가까운 것을 골라주세요.</p>
+            <div class="chip-grid" id="actionCategoryOptions"></div>
+            <div class="subchoice-panel" id="actionDetailPanel">
+              <div class="fieldset-heading">
+                <strong>세부 행동/사건</strong>
+                <span id="actionCount" class="limit-hint">최대 3개</span>
+              </div>
+              <div class="chip-grid clue-grid" id="actionOptions"></div>
+            </div>
           </fieldset>
+
+          <fieldset class="step-panel" data-step="4">
+            <div class="fieldset-heading">
+              <legend>현실 주제</legend>
+              <span id="lifeTopicCategoryCount" class="limit-hint">큰 분류 최대 2개</span>
+            </div>
+            <p class="field-help">요즘 신경 쓰이는 현실 주제가 있다면 선택해주세요. 없으면 넘어가도 됩니다.</p>
+            <div class="chip-grid" id="lifeTopicCategoryOptions"></div>
+            <div class="subchoice-panel" id="lifeTopicDetailPanel">
+              <div class="fieldset-heading">
+                <strong>세부 현실 주제</strong>
+                <span id="lifeTopicCount" class="limit-hint">선택 사항 · 최대 2개</span>
+              </div>
+              <div class="chip-grid clue-grid" id="lifeTopicOptions"></div>
+            </div>
+          </fieldset>
+
+          <section class="step-panel" data-step="5" aria-labelledby="memoStepTitle">
+            <h3 id="memoStepTitle">꿈 메모</h3>
+            <p class="field-help">메모는 꿈 일기처럼 저장만 되고 해석에는 반영되지 않습니다.</p>
+            <label for="dreamInput">꿈 메모 <span class="optional-label">선택 사항 · 해석 미반영 · 250자</span></label>
+            <textarea
+              id="dreamInput"
+              name="dream"
+              rows="3"
+              maxlength="250"
+              placeholder="예: 시험장을 못 찾고 동전 몇 개만 남음"
+            ></textarea>
+          </section>
+
+          <label class="save-option">
+            <input type="checkbox" id="saveHistoryInput" checked />
+            최근 기록에 저장
+          </label>
 
           <div class="form-footer">
             <p id="wordCount">0자</p>
+            <button class="ghost-button" id="prevStepButton" type="button">이전</button>
+            <button class="ghost-button" id="nextStepButton" type="button">다음</button>
             <button class="primary-button" id="submitButton" type="submit">해석하기</button>
           </div>
         </form>
@@ -101,38 +169,57 @@
         </div>
 
         <div id="emptyState" class="empty-state">
-          <strong>꿈을 적으면 바로 풀이가 나와요.</strong>
-          <span>상징, 감정 흐름, 지금의 질문, 작은 실천까지 정리해드립니다.</span>
+          <strong>꿈 단서를 고르면 바로 풀이가 나와요.</strong>
+          <span>장소, 분위기, 대상, 행동을 조합해 상징과 마음의 흐름을 정리해드립니다.</span>
         </div>
 
         <article id="resultCard" class="result-card hidden">
           <div>
             <span class="tag" id="moodTag">평온함</span>
             <span class="tag" id="themeTag">전환</span>
-            <span class="tag" id="toneTag">기본형</span>
             <span class="tag" id="engineTag">키워드 해석</span>
           </div>
           <h3 id="summaryTitle"></h3>
-          <p id="summaryText"></p>
+          <section class="result-section summary-section">
+            <h4>종합 해석</h4>
+            <p id="summaryText"></p>
+          </section>
 
-          <div class="insight-grid">
-            <section>
-              <h4>주요 상징</h4>
-              <ul id="symbolList"></ul>
-            </section>
-            <section>
-              <h4>마음의 흐름</h4>
-              <p id="emotionText"></p>
-            </section>
-            <section>
+          <section class="result-section">
+            <h4>선택한 단서</h4>
+            <div class="selected-summary" id="selectedSummary"></div>
+          </section>
+
+          <section class="result-section">
+            <h4>중요한 단서</h4>
+            <ul id="symbolList" class="symbol-list"></ul>
+          </section>
+
+          <section class="result-section">
+            <h4>마음의 흐름</h4>
+            <p id="emotionText"></p>
+          </section>
+
+          <section class="result-section hidden" id="realitySection">
+            <h4>현실과 연결하기</h4>
+            <p id="realityText"></p>
+          </section>
+
+          <div class="result-two-column">
+            <section class="result-section">
               <h4>지금 던져볼 질문</h4>
               <p id="questionText"></p>
             </section>
-            <section>
+            <section class="result-section">
               <h4>오늘의 작은 행동</h4>
               <p id="actionText"></p>
             </section>
           </div>
+
+          <section class="memo-note hidden" id="memoNote">
+            <h4>꿈 메모</h4>
+            <p id="memoText"></p>
+          </section>
         </article>
       </section>
 
@@ -142,6 +229,7 @@
             <p class="eyebrow">Archive</p>
             <h2 id="history-title">최근 꿈 기록</h2>
           </div>
+          <button class="ghost-button" id="clearHistoryButton" type="button">기록 비우기</button>
         </div>
         <div id="historyList" class="history-list"></div>
       </section>
@@ -261,9 +349,9 @@
           기록 비우기 버튼을 눌러 저장된 내용을 삭제하세요.
         </p>
         <p>
-          AI 해석을 선택하면 꿈 내용, 선택한 감정, 해석 톤이 해석 생성을 위해 OpenAI API로
-          전송될 수 있습니다. 민감한 개인정보, 실명, 연락처, 주소, 금융정보는 입력하지 않는
-          것을 권장합니다.
+          AI 해석 기능은 현재 준비 중입니다. 향후 AI 해석을 제공할 경우 꿈 내용, 선택한 감정,
+          해석 톤이 해석 생성을 위해 OpenAI API로 전송될 수 있으며, 민감한 개인정보, 실명,
+          연락처, 주소, 금융정보는 입력하지 않는 것을 권장합니다.
         </p>
         <p>
           향후 Google AdSense를 적용하면 Google 및 제3자 광고 사업자가 쿠키를 사용해 이전
