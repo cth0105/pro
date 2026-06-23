@@ -489,8 +489,35 @@ ul {
   max-width: 54rem;
 }
 
+.faq-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.faq-list details {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.faq-list summary {
+  cursor: pointer;
+  padding: 1rem;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.faq-list p {
+  margin: 0;
+  padding: 0 1rem 1rem;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
 .policy-text p:last-child,
 .info-grid p:last-child,
+.faq-list p:last-child,
 .site-footer p:last-child {
   margin-bottom: 0;
 }
