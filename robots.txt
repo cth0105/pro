@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dream-interpretation1.netlify.app/sitemap.xml
+Sitemap: https://dream-interpretation-app.netlify.app/sitemap.xml
