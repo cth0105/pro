@@ -16,6 +16,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://dream-interpretation-app.netlify.app/" />
     <meta property="og:site_name" content="꿈해몽 노트" />
+    <meta name="theme-color" content="#7bc0a9" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="꿈해몽 노트 - 무료 꿈 풀이 웹앱" />
     <meta
@@ -27,6 +28,9 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2041754449338335"
       crossorigin="anonymous"
     ></script>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -34,10 +38,16 @@
       <a class="site-logo" href="#app-title">꿈해몽 노트</a>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="#app-title">꿈 풀이</a>
-        <a href="#guide">해석 가이드</a>
-        <a href="#faq">FAQ</a>
-        <a href="#privacy">개인정보</a>
-        <a href="#contact">문의</a>
+        <a href="journal.html">꿈 일기장</a>
+        <details class="more-menu">
+          <summary>더보기 <span aria-hidden="true">▾</span></summary>
+          <div class="more-menu-list">
+            <a href="#guide">해석 가이드</a>
+            <a href="#faq">FAQ</a>
+            <a href="#privacy">개인정보</a>
+            <a href="#contact">문의</a>
+          </div>
+        </details>
       </nav>
     </header>
 
@@ -72,7 +82,7 @@
               <legend>장소</legend>
               <span id="placeCategoryCount" class="limit-hint">큰 분류 최대 2개</span>
             </div>
-            <p class="field-help">꿈이 펼쳐진 공간을 먼저 골라주세요. 정확하지 않아도 가장 가까운 곳이면 충분합니다.</p>
+            <p class="field-help">가장 가까운 장소를 골라주세요.</p>
             <div class="chip-grid" id="placeCategoryOptions"></div>
             <div class="subchoice-panel" id="placeDetailPanel">
               <div class="fieldset-heading">
@@ -85,7 +95,7 @@
 
           <fieldset class="step-panel" data-step="1">
             <legend>가장 남은 감정</legend>
-            <p class="field-help">꿈에서 깬 뒤 가장 또렷하게 남은 감정을 하나 골라주세요.</p>
+            <p class="field-help">깬 뒤 가장 또렷한 감정 하나를 골라주세요.</p>
             <div class="chip-grid" id="moodGroup">
               <label><input type="radio" name="mood" value="평온함" checked />평온함</label>
               <label><input type="radio" name="mood" value="불안함" />불안함</label>
@@ -103,7 +113,7 @@
               <legend>등장한 대상</legend>
               <span id="targetCategoryCount" class="limit-hint">큰 분류 최대 3개</span>
             </div>
-            <p class="field-help">꿈에서 눈에 띄었던 사람, 동물, 물건, 상징을 골라주세요.</p>
+            <p class="field-help">가장 눈에 띈 대상만 골라주세요.</p>
             <div class="chip-grid" id="targetCategoryOptions"></div>
             <div class="subchoice-panel" id="targetDetailPanel">
               <div class="fieldset-heading">
@@ -119,7 +129,7 @@
               <legend>행동/사건</legend>
               <span id="actionCategoryCount" class="limit-hint">큰 분류 최대 3개</span>
             </div>
-            <p class="field-help">꿈에서 실제로 벌어진 일이나 내 행동에 가까운 것을 골라주세요.</p>
+            <p class="field-help">꿈에서 벌어진 일에 가까운 것을 골라주세요.</p>
             <div class="chip-grid" id="actionCategoryOptions"></div>
             <div class="subchoice-panel" id="actionDetailPanel">
               <div class="fieldset-heading">
@@ -135,7 +145,7 @@
               <legend>현실 주제</legend>
               <span id="lifeTopicCategoryCount" class="limit-hint">큰 분류 최대 2개</span>
             </div>
-            <p class="field-help">요즘 신경 쓰이는 현실 주제가 있다면 선택해주세요. 없으면 넘어가도 됩니다.</p>
+            <p class="field-help">요즘 신경 쓰이는 일이 없다면 넘어가도 됩니다.</p>
             <div class="chip-grid" id="lifeTopicCategoryOptions"></div>
             <div class="subchoice-panel" id="lifeTopicDetailPanel">
               <div class="fieldset-heading">
@@ -147,9 +157,14 @@
           </fieldset>
 
           <section class="step-panel" data-step="5" aria-labelledby="memoStepTitle">
-            <h3 id="memoStepTitle">꿈 메모</h3>
-            <p class="field-help">메모는 꿈 일기처럼 저장만 되고 해석에는 반영되지 않습니다.</p>
-            <label for="dreamInput">꿈 메모 <span class="optional-label">선택 사항 · 해석 미반영 · 250자</span></label>
+            <h3 id="memoStepTitle">선택 항목 확인</h3>
+            <div class="selection-review" id="selectionReview" aria-live="polite"></div>
+            <p class="field-help">일기장 메모는 기록용이며 해석에는 반영되지 않습니다.</p>
+            <label for="dreamInput">꿈 일기장</label>
+            <div class="memo-meta">
+              <span>선택 사항 · 해석 미반영</span>
+              <span id="memoCounter">0/250</span>
+            </div>
             <textarea
               id="dreamInput"
               name="dream"
@@ -179,7 +194,10 @@
             <p class="eyebrow">Interpretation</p>
             <h2 id="result-title">해석 결과</h2>
           </div>
-          <button class="ghost-button" id="copyButton" type="button" disabled>복사</button>
+          <div class="result-actions">
+            <button class="ghost-button" id="saveDreamButton" type="button" disabled>꿈 일기장에 저장</button>
+            <button class="ghost-button" id="copyButton" type="button" disabled>결과 복사</button>
+          </div>
         </div>
 
         <div id="emptyState" class="empty-state">
@@ -194,6 +212,10 @@
             <span class="tag" id="engineTag">키워드 해석</span>
           </div>
           <h3 id="summaryTitle"></h3>
+          <section class="fortune-line">
+            <span>오늘의 흐름</span>
+            <strong id="fortuneSummaryText"></strong>
+          </section>
           <section class="result-section summary-section">
             <h4>종합 해석</h4>
             <p id="summaryText"></p>
@@ -231,7 +253,7 @@
           </div>
 
           <section class="memo-note hidden" id="memoNote">
-            <h4>꿈 메모</h4>
+            <h4>꿈 일기장 메모</h4>
             <p id="memoText"></p>
           </section>
         </article>
@@ -247,6 +269,7 @@
         </div>
         <div id="historyList" class="history-list"></div>
       </section>
+
     </main>
 
     <section class="content-shell" id="guide" aria-labelledby="guide-title">
@@ -299,6 +322,10 @@
           불면, 악몽, 불안, 우울감이 오래 이어지거나 일상생활에 영향을 준다면 전문 의료진
           또는 상담 전문가와 상의하는 것이 좋습니다.
         </p>
+        <p>
+          결과에 포함된 “오늘의 흐름”과 운세형 문구는 재미와 자기 성찰을 위한 표현입니다.
+          중요한 결정이나 건강, 재정, 법률 문제는 꿈해몽 결과만으로 판단하지 마세요.
+        </p>
       </div>
     </section>
 
@@ -346,6 +373,28 @@
           <p>
             악몽이 수면이나 일상생활을 계속 방해한다면 생활 리듬을 점검하고, 필요하면
             의료진이나 상담 전문가와 상의하세요. 이 사이트는 전문 진료를 대신하지 않습니다.
+          </p>
+        </details>
+        <details>
+          <summary>꿈에서 같은 장소가 반복되면 무슨 뜻인가요?</summary>
+          <p>
+            같은 장소가 반복된다면 그 공간이 주는 감정이 중요할 수 있습니다. 집은 안정감,
+            학교는 평가와 배움, 길은 선택과 전환처럼 현실의 고민이 익숙한 장소로 표현될 수
+            있습니다.
+          </p>
+        </details>
+        <details>
+          <summary>꿈해몽은 심리 상태와 관련이 있나요?</summary>
+          <p>
+            꿈은 최근의 감정, 기억, 스트레스가 섞여 나타나는 경우가 많습니다. 그래서 꿈해몽은
+            미래를 맞히는 도구라기보다 현재 마음을 돌아보는 참고 자료로 활용하는 편이 좋습니다.
+          </p>
+        </details>
+        <details>
+          <summary>꿈 기록을 꾸준히 하면 어떤 점이 좋나요?</summary>
+          <p>
+            반복되는 감정과 상징을 발견하기 쉬워집니다. 꿈을 짧게라도 기록하면 요즘 자주
+            신경 쓰는 관계, 일, 불안, 기대를 조금 더 객관적으로 살펴볼 수 있습니다.
           </p>
         </details>
       </div>

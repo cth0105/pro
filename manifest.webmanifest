@@ -1,0 +1,24 @@
+{
+  "name": "꿈해몽 노트",
+  "short_name": "꿈해몽",
+  "description": "꿈의 단서를 골라 상징 해석과 오늘의 흐름을 확인하는 한국어 꿈 풀이 웹앱입니다.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7fbf8",
+  "theme_color": "#7bc0a9",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

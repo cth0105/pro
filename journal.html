@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>꿈 일기장 | 꿈해몽 노트</title>
+    <meta
+      name="description"
+      content="꿈해몽 노트에서 직접 저장한 꿈 해석과 꿈 일기장 메모를 모아보는 페이지입니다."
+    />
+    <meta name="theme-color" content="#7bc0a9" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-logo" href="index.html">꿈해몽 노트</a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="index.html">꿈 풀이</a>
+        <a href="journal.html" aria-current="page">꿈 일기장</a>
+        <details class="more-menu">
+          <summary>더보기 <span aria-hidden="true">▾</span></summary>
+          <div class="more-menu-list">
+            <a href="index.html#guide">해석 가이드</a>
+            <a href="index.html#faq">FAQ</a>
+            <a href="index.html#privacy">개인정보</a>
+            <a href="index.html#contact">문의</a>
+          </div>
+        </details>
+      </nav>
+    </header>
+
+    <main class="journal-page">
+      <section class="journal-panel" aria-labelledby="journal-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Journal</p>
+            <h1 id="journal-title">꿈 일기장</h1>
+          </div>
+          <button class="ghost-button" id="clearSavedButton" type="button">꿈 일기장 비우기</button>
+        </div>
+        <p class="panel-note">
+          마음에 드는 해석만 직접 저장해두는 보관함입니다. 최근 꿈 기록을 비워도 이곳의 꿈은 유지됩니다.
+        </p>
+        <div id="savedJournalList" class="journal-list"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <strong>꿈해몽 노트</strong>
+        <p>꿈 기록과 자기 성찰을 위한 한국어 웹앱</p>
+      </div>
+      <div>
+        <p>문의: <a href="mailto:cth101010@gmail.com">cth101010@gmail.com</a></p>
+        <p>최종 업데이트: 2026년 6월 23일</p>
+      </div>
+    </footer>
+
+    <script src="journal.js"></script>
+  </body>
+</html>

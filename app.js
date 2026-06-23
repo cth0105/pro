@@ -1,5 +1,6 @@
 const dreamForm = document.querySelector("#dreamForm");
 const dreamInput = document.querySelector("#dreamInput");
+const memoCounter = document.querySelector("#memoCounter");
 const wordCount = document.querySelector("#wordCount");
 const emptyState = document.querySelector("#emptyState");
 const resultCard = document.querySelector("#resultCard");
@@ -7,13 +8,17 @@ const moodTag = document.querySelector("#moodTag");
 const themeTag = document.querySelector("#themeTag");
 const summaryTitle = document.querySelector("#summaryTitle");
 const summaryText = document.querySelector("#summaryText");
+const fortuneSummaryText = document.querySelector("#fortuneSummaryText");
 const symbolList = document.querySelector("#symbolList");
 const emotionText = document.querySelector("#emotionText");
 const questionText = document.querySelector("#questionText");
 const actionText = document.querySelector("#actionText");
 const copyButton = document.querySelector("#copyButton");
+const saveDreamButton = document.querySelector("#saveDreamButton");
 const historyList = document.querySelector("#historyList");
+const savedList = document.querySelector("#savedList");
 const clearHistoryButton = document.querySelector("#clearHistoryButton");
+const clearSavedButton = document.querySelector("#clearSavedButton");
 const resetButton = document.querySelector("#resetButton");
 const submitButton = document.querySelector("#submitButton");
 const prevStepButton = document.querySelector("#prevStepButton");
@@ -30,6 +35,7 @@ const actionOptions = document.querySelector("#actionOptions");
 const lifeTopicCategoryOptions = document.querySelector("#lifeTopicCategoryOptions");
 const lifeTopicOptions = document.querySelector("#lifeTopicOptions");
 const selectedSummary = document.querySelector("#selectedSummary");
+const selectionReview = document.querySelector("#selectionReview");
 const realitySection = document.querySelector("#realitySection");
 const realityText = document.querySelector("#realityText");
 const memoNote = document.querySelector("#memoNote");
@@ -37,9 +43,11 @@ const memoText = document.querySelector("#memoText");
 const saveHistoryInput = document.querySelector("#saveHistoryInput");
 
 const STORAGE_KEY = "dream-note-history";
+const SAVED_STORAGE_KEY = "dream-note-saved";
 const OPTION_PREFIX = "dream-option:";
-const stepLabels = ["장소", "감정", "대상", "사건", "현실", "메모"];
+const stepLabels = ["장소", "감정", "대상", "사건", "현실", "확인"];
 let currentStep = 0;
+let currentResult = null;
 
 const optionLimits = {
   place: 2,
@@ -568,6 +576,39 @@ function setHistory(items) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, 6)));
 }
 
+function getSavedDreams() {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_STORAGE_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function setSavedDreams(items) {
+  localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(items));
+}
+
+function getResultId(result) {
+  return result?.createdAt || `${result?.title || ""}:${result?.selectedLabels || result?.dream || ""}`;
+}
+
+function isSavedResult(result) {
+  const id = getResultId(result);
+  return Boolean(id) && getSavedDreams().some((item) => getResultId(item) === id);
+}
+
+function updateSaveButton(result = currentResult) {
+  if (!result) {
+    saveDreamButton.disabled = true;
+    saveDreamButton.textContent = "꿈 일기장에 저장";
+    return;
+  }
+
+  const saved = isSavedResult(result);
+  saveDreamButton.disabled = saved;
+  saveDreamButton.textContent = saved ? "저장됨" : "꿈 일기장에 저장";
+}
+
 function getAllOptions() {
   return [
     ...optionGroups.place,
@@ -736,6 +777,29 @@ function getSelectedOptions() {
   return ids.map(getOptionById).filter(Boolean);
 }
 
+function getSelectedLabelsByGroup(groupName) {
+  return getSelectedByGroup(getSelectedOptions(), groupName).map((option) => option.label);
+}
+
+function renderSelectionReview() {
+  const rows = [
+    ["장소", getSelectedLabelsByGroup("place")],
+    ["감정", [new FormData(dreamForm).get("mood")].filter(Boolean)],
+    ["대상", getSelectedLabelsByGroup("targetDetail")],
+    ["사건", getSelectedLabelsByGroup("action")],
+    ["현실", getSelectedLabelsByGroup("lifeTopic")],
+  ];
+
+  selectionReview.innerHTML = "";
+  rows.forEach(([label, values]) => {
+    const p = document.createElement("p");
+    const strong = document.createElement("strong");
+    strong.textContent = `${label}: `;
+    p.append(strong, values.length ? values.join(", ") : "선택 안 함");
+    selectionReview.append(p);
+  });
+}
+
 function getSelectedCategoryLabels() {
   const categories = getCheckedValues("targetCategory");
   return optionGroups.targetCategory
@@ -838,7 +902,7 @@ function buildDailyFortune(theme, mood, action, seed) {
     자기확인: [
       "오늘은 결과보다 내가 해낸 과정을 인정할 때 기운이 좋아지는 날입니다.",
       "오늘은 남의 평가보다 내 기준을 한 번 더 확인하면 중심이 잡힙니다.",
-      "오늘은 작은 성취를 기록해두면 자신감의 흐름이 이어집니다.",
+      "오늘은 스스로를 인정하는 태도가 자신감의 흐름을 이어줍니다.",
     ],
     풍요: [
       "오늘은 돈이나 자원 문제를 크게 키우기보다 작은 균형을 맞추면 좋은 날입니다.",
@@ -880,6 +944,34 @@ function buildDailyFortune(theme, mood, action, seed) {
   const moodNote = pickVariant(`${seed}:mood:${mood}`, moodNotes[mood] || [""]);
 
   return `${fortune} ${moodNote} ${action}`;
+}
+
+function buildFortuneSummary(theme, mood, seed) {
+  const summaries = {
+    관계: ["말투와 거리감이 중요한 날", "작은 안부가 흐름을 바꾸는 날", "관계의 온도를 천천히 맞추는 날"],
+    불안: ["서두르기보다 확인이 중요한 날", "걱정을 작게 나눌수록 편해지는 날", "큰 결정 전 점검이 필요한 날"],
+    전환: ["작은 선택이 방향을 여는 날", "미뤄둔 첫 단계를 시작하기 좋은 날", "새 흐름을 준비하기 좋은 날"],
+    회복: ["무리보다 회복이 우선인 날", "쉬어갈수록 마음이 정리되는 날", "컨디션을 챙기면 운이 살아나는 날"],
+    자기확인: ["내 기준을 믿어도 좋은 날", "작은 성취를 인정하면 좋은 날", "평가보다 과정이 중요한 날"],
+    풍요: ["작은 균형이 현실운을 돕는 날", "가진 것과 필요한 것을 구분할 날", "충동보다 차분한 선택이 좋은 날"],
+    상실: ["내려놓을수록 가벼워지는 날", "끝난 일과 남은 일을 나눠볼 날", "조용한 정리가 필요한 날"],
+    성장: ["작은 가능성을 키우기 좋은 날", "배움과 시도가 운을 여는 날", "천천히 자라는 흐름이 좋은 날"],
+    책임: ["혼자 안기보다 나누면 좋은 날", "일의 순서를 세우면 편해지는 날", "내 몫을 분명히 하면 좋은 날"],
+    정리: ["정리할수록 막힌 흐름이 풀리는 날", "복잡한 일을 단순하게 나눌 날", "작은 정돈이 마음을 가볍게 하는 날"],
+  };
+  const moodPrefix = {
+    평온함: "차분하게",
+    불안함: "확인하며",
+    기쁨: "가볍게",
+    그리움: "무리하지 않고",
+    혼란스러움: "단순하게",
+    무서움: "안전하게",
+    답답함: "하나씩",
+    설렘: "작게 시작하며",
+  };
+  const summary = pickVariant(`${seed}:fortune-line:${theme}`, summaries[theme] || ["마음의 방향을 살피기 좋은 날"]);
+
+  return `${moodPrefix[mood] || "천천히"} ${summary}`;
 }
 
 function getSelectedByGroup(selectedOptions, groupName) {
@@ -948,6 +1040,7 @@ function buildKeywordResult({ selectedOptions, mood, tone, memo }) {
   const importantOptions = nonLifeOptions.length ? nonLifeOptions : selectedOptions;
   const seed = `${selectedOptions.map((option) => option.id).join("|")}:${mood}:${memo.length}`;
   const summary = buildVariedSummary({ rule, coreScene, theme, mood, seed });
+  const fortuneSummary = buildFortuneSummary(theme, mood, seed);
 
   return {
     createdAt: new Date().toISOString(),
@@ -963,6 +1056,7 @@ function buildKeywordResult({ selectedOptions, mood, tone, memo }) {
     theme,
     title,
     summary,
+    fortuneSummary,
     reality,
     symbols: importantOptions.slice(0, 4).map((option) => ({
       label: option.label,
@@ -1176,15 +1270,18 @@ async function requestAiInterpretation(text, mood, tone) {
 }
 
 function renderResult(result) {
+  currentResult = result;
   emptyState.classList.add("hidden");
   resultCard.classList.remove("hidden");
   copyButton.disabled = false;
+  updateSaveButton(result);
 
   moodTag.textContent = result.mood;
   themeTag.textContent = result.theme;
   engineTag.textContent = result.engineLabel || engineLabels[result.engine] || engineLabels.keyword;
   summaryTitle.textContent = result.title;
   summaryText.textContent = result.summary;
+  fortuneSummaryText.textContent = result.fortuneSummary || `${result.mood} 마음을 살피기 좋은 날`;
   emotionText.textContent = result.emotion;
   questionText.textContent = result.question;
   actionText.textContent = result.action;
@@ -1213,13 +1310,22 @@ function renderResult(result) {
   });
 
   copyButton.dataset.copy = [
-    `꿈해몽 노트 - ${result.title}`,
-    `감정: ${result.mood}`,
-    `테마: ${result.theme}`,
-    `해석 방식: ${engineTag.textContent}`,
+    `꿈해몽 노트`,
+    ``,
+    `오늘의 흐름: ${fortuneSummaryText.textContent}`,
+    `꿈의 주제: ${result.title}`,
+    `남은 감정: ${result.mood}`,
+    ``,
+    `[종합 해석]`,
     result.summary,
-    `질문: ${result.question}`,
-    `작은 행동: ${result.action}`,
+    ``,
+    `[지금 던져볼 질문]`,
+    result.question,
+    ``,
+    `[오늘의 작은 행동]`,
+    result.action,
+    ``,
+    `선택한 단서: ${result.selectedLabels || result.dream || ""}`,
   ].join("\n");
 }
 
@@ -1228,6 +1334,71 @@ function scrollToResult() {
     behavior: "smooth",
     block: "start",
   });
+}
+
+function restoreResultToForm(item) {
+  renderResult(item);
+  dreamInput.value = item.memo || "";
+  restoreSelections(item.selectedOptionIds || []);
+  updateCount();
+  const moodInput = document.querySelector(`input[name="mood"][value="${item.mood}"]`);
+  if (moodInput) {
+    moodInput.checked = true;
+  }
+  currentStep = 5;
+  renderStep();
+}
+
+function createDreamCard(item, options = {}) {
+  const wrapper = document.createElement("article");
+  wrapper.className = options.className || "history-item";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.addEventListener("click", () => {
+    restoreResultToForm(item);
+  });
+
+  const date = document.createElement("span");
+  date.className = "history-date";
+  date.textContent = new Intl.DateTimeFormat("ko-KR", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(item.savedAt || item.createdAt));
+
+  const title = document.createElement("strong");
+  title.textContent = item.title;
+
+  const meta = document.createElement("span");
+  meta.className = "history-meta";
+
+  const mood = document.createElement("span");
+  mood.textContent = item.mood || "감정";
+
+  const flow = document.createElement("span");
+  flow.textContent = item.fortuneSummary || item.theme || "오늘의 흐름";
+
+  meta.append(mood, flow);
+
+  const preview = document.createElement("span");
+  preview.className = "history-preview";
+  preview.textContent = item.memo || item.selectedLabels || item.dream;
+
+  button.append(date, title, meta, preview);
+  wrapper.append(button);
+
+  if (options.onDelete) {
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-saved-button";
+    deleteButton.type = "button";
+    deleteButton.textContent = "삭제";
+    deleteButton.addEventListener("click", () => options.onDelete(item));
+    wrapper.append(deleteButton);
+  }
+
+  return wrapper;
 }
 
 function renderHistory() {
@@ -1243,43 +1414,35 @@ function renderHistory() {
   }
 
   history.forEach((item, index) => {
-    const wrapper = document.createElement("article");
-    wrapper.className = "history-item";
+    historyList.append(createDreamCard(item));
+  });
+}
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.addEventListener("click", () => {
-      renderResult(item);
-      dreamInput.value = item.memo || "";
-      restoreSelections(item.selectedOptionIds || []);
-      updateCount();
-      const moodInput = document.querySelector(`input[name="mood"][value="${item.mood}"]`);
-      if (moodInput) {
-        moodInput.checked = true;
-      }
-      currentStep = 5;
-      renderStep();
-    });
+function renderSavedDreams() {
+  if (!savedList) {
+    return;
+  }
 
-    const date = document.createElement("span");
-    date.className = "history-date";
-    date.textContent = new Intl.DateTimeFormat("ko-KR", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(item.createdAt));
+  const saved = getSavedDreams();
+  savedList.innerHTML = "";
 
-    const title = document.createElement("strong");
-    title.textContent = item.title;
+  if (!saved.length) {
+    const empty = document.createElement("p");
+    empty.className = "history-empty";
+    empty.textContent = "아직 꿈 일기장에 저장된 꿈이 없습니다.";
+    savedList.append(empty);
+    return;
+  }
 
-    const preview = document.createElement("span");
-    preview.className = "history-preview";
-    preview.textContent = item.memo || item.selectedLabels || item.dream;
-
-    button.append(date, title, preview);
-    wrapper.append(button);
-    historyList.append(wrapper);
+  saved.forEach((item) => {
+    savedList.append(createDreamCard(item, {
+      className: "history-item saved-item",
+      onDelete: (target) => {
+        setSavedDreams(getSavedDreams().filter((dream) => getResultId(dream) !== getResultId(target)));
+        renderSavedDreams();
+        updateSaveButton();
+      },
+    }));
   });
 }
 
@@ -1287,6 +1450,8 @@ function updateCount() {
   const selectedCount = getSelectedOptions().length;
   const memoLength = dreamInput.value.trim().length;
   wordCount.textContent = `선택 ${selectedCount}개 · 메모 ${memoLength}자`;
+  memoCounter.textContent = `${dreamInput.value.length}/250`;
+  renderSelectionReview();
 }
 
 function restoreSelections(ids) {
@@ -1342,6 +1507,9 @@ function restoreSelections(ids) {
 }
 
 dreamInput.addEventListener("input", updateCount);
+document.querySelectorAll('input[name="mood"]').forEach((input) => {
+  input.addEventListener("change", updateCount);
+});
 
 dreamForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -1383,7 +1551,7 @@ copyButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(copyButton.dataset.copy);
     copyButton.textContent = "복사됨";
     setTimeout(() => {
-      copyButton.textContent = "복사";
+      copyButton.textContent = "결과 복사";
     }, 1400);
   } catch {
     copyButton.textContent = "복사 실패";
@@ -1394,6 +1562,29 @@ clearHistoryButton.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
   renderHistory();
 });
+
+saveDreamButton.addEventListener("click", () => {
+  if (!currentResult || isSavedResult(currentResult)) {
+    updateSaveButton();
+    return;
+  }
+
+  const savedItem = {
+    ...currentResult,
+    savedAt: new Date().toISOString(),
+  };
+  setSavedDreams([savedItem, ...getSavedDreams()]);
+  renderSavedDreams();
+  updateSaveButton(savedItem);
+});
+
+if (clearSavedButton) {
+  clearSavedButton.addEventListener("click", () => {
+    localStorage.removeItem(SAVED_STORAGE_KEY);
+    renderSavedDreams();
+    updateSaveButton();
+  });
+}
 
 prevStepButton.addEventListener("click", () => {
   currentStep -= 1;
@@ -1420,3 +1611,5 @@ renderChoiceUi();
 renderStep();
 updateCount();
 renderHistory();
+renderSavedDreams();
+updateSaveButton();
