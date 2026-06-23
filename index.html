@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>꿈해몽 노트</title>
+    <meta
+      name="description"
+      content="꿈해몽 노트는 꿈의 장면, 감정, 상징을 정리해 자기 성찰에 도움을 주는 한국어 꿈 풀이 웹앱입니다."
+    />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2041754449338335"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-logo" href="#app-title">꿈해몽 노트</a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="#app-title">꿈 풀이</a>
+        <a href="#guide">해석 가이드</a>
+        <a href="#privacy">개인정보</a>
+        <a href="#contact">문의</a>
+      </nav>
+    </header>
+
+    <aside class="ad-slot top-ad" aria-label="상단 광고 영역">
+      <span>광고</span>
+      <strong>상단 광고 영역</strong>
+      <p>애드센스 승인 후 반응형 광고 코드를 이 위치에 넣을 수 있습니다.</p>
+    </aside>
+
+    <main class="app-shell" id="dream-app">
+      <section class="composer" aria-labelledby="app-title">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Dream Journal</p>
+            <h1 id="app-title">꿈해몽 노트</h1>
+          </div>
+          <button class="ghost-button" id="clearHistoryButton" type="button">기록 비우기</button>
+        </div>
+
+        <form id="dreamForm" class="dream-form">
+          <label for="dreamInput">오늘 기억나는 꿈</label>
+          <textarea
+            id="dreamInput"
+            name="dream"
+            rows="8"
+            placeholder="예: 낯선 역에서 기차를 기다리는데, 하늘에서 비가 아주 조용히 내렸어요."
+            required
+          ></textarea>
+
+          <fieldset>
+            <legend>꿈에서 가장 강했던 감정</legend>
+            <div class="chip-grid" id="moodGroup">
+              <label><input type="radio" name="mood" value="평온함" checked />평온함</label>
+              <label><input type="radio" name="mood" value="불안함" />불안함</label>
+              <label><input type="radio" name="mood" value="기쁨" />기쁨</label>
+              <label><input type="radio" name="mood" value="그리움" />그리움</label>
+              <label><input type="radio" name="mood" value="혼란스러움" />혼란스러움</label>
+            </div>
+          </fieldset>
+
+          <div class="form-footer">
+            <p id="wordCount">0자</p>
+            <button class="primary-button" type="submit">해석하기</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="result-panel" aria-live="polite" aria-labelledby="result-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Interpretation</p>
+            <h2 id="result-title">해석 결과</h2>
+          </div>
+          <button class="ghost-button" id="copyButton" type="button" disabled>복사</button>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          <strong>꿈을 적으면 바로 풀이가 나와요.</strong>
+          <span>상징, 감정 흐름, 지금의 질문, 작은 실천까지 정리해드립니다.</span>
+        </div>
+
+        <article id="resultCard" class="result-card hidden">
+          <div>
+            <span class="tag" id="moodTag">평온함</span>
+            <span class="tag" id="themeTag">전환</span>
+          </div>
+          <h3 id="summaryTitle"></h3>
+          <p id="summaryText"></p>
+
+          <div class="insight-grid">
+            <section>
+              <h4>주요 상징</h4>
+              <ul id="symbolList"></ul>
+            </section>
+            <section>
+              <h4>마음의 흐름</h4>
+              <p id="emotionText"></p>
+            </section>
+            <section>
+              <h4>지금 던져볼 질문</h4>
+              <p id="questionText"></p>
+            </section>
+            <section>
+              <h4>오늘의 작은 행동</h4>
+              <p id="actionText"></p>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <section class="history-panel" aria-labelledby="history-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Archive</p>
+            <h2 id="history-title">최근 꿈 기록</h2>
+          </div>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <section class="content-shell" id="guide" aria-labelledby="guide-title">
+      <div class="section-heading">
+        <p class="eyebrow">Guide</p>
+        <h2 id="guide-title">꿈을 해석하는 방법</h2>
+        <p>
+          꿈해몽 노트는 꿈을 단정적으로 예언하기보다, 꿈에 남은 장면과 감정을
+          차분히 정리해 현재의 마음을 돌아보도록 돕는 도구입니다.
+        </p>
+      </div>
+
+      <div class="info-grid">
+        <article>
+          <h3>1. 장면보다 감정부터 보기</h3>
+          <p>
+            같은 꿈이라도 무서웠는지, 편안했는지, 그리웠는지에 따라 의미가 달라집니다.
+            먼저 꿈을 떠올렸을 때 몸에 남는 감각과 감정의 이름을 적어보세요.
+          </p>
+        </article>
+        <article>
+          <h3>2. 반복되는 상징 찾기</h3>
+          <p>
+            물, 집, 길, 학교, 사람처럼 자주 등장하는 이미지는 현재 삶에서 오래 생각하고
+            있는 주제와 연결될 수 있습니다. 상징은 정답이 아니라 질문의 출발점입니다.
+          </p>
+        </article>
+        <article>
+          <h3>3. 현실의 상황과 연결하기</h3>
+          <p>
+            꿈의 해석은 최근의 관계, 일, 건강, 선택의 압박과 함께 보아야 자연스럽습니다.
+            불편한 꿈이 반복되면 생활 리듬과 스트레스 요인도 함께 살펴보세요.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-shell" id="about" aria-labelledby="about-title">
+      <div class="section-heading">
+        <p class="eyebrow">About</p>
+        <h2 id="about-title">이 사이트의 원칙</h2>
+      </div>
+      <div class="policy-text">
+        <p>
+          꿈해몽 노트는 사용자가 입력한 꿈 내용을 바탕으로 상징과 감정 흐름을 정리합니다.
+          해석 결과는 재미와 자기 성찰을 위한 참고 자료이며, 의학적 진단이나 심리 상담,
+          법률·재정 조언을 대신하지 않습니다.
+        </p>
+        <p>
+          불면, 악몽, 불안, 우울감이 오래 이어지거나 일상생활에 영향을 준다면 전문 의료진
+          또는 상담 전문가와 상의하는 것이 좋습니다.
+        </p>
+      </div>
+    </section>
+
+    <section class="content-shell" id="privacy" aria-labelledby="privacy-title">
+      <div class="section-heading">
+        <p class="eyebrow">Privacy</p>
+        <h2 id="privacy-title">개인정보 및 광고 안내</h2>
+      </div>
+      <div class="policy-text">
+        <p>
+          현재 이 웹앱은 입력한 꿈과 최근 기록을 사용자의 브라우저 localStorage에 저장합니다.
+          별도의 서버로 꿈 내용을 전송하지 않습니다. 공용 기기에서는 기록 비우기 버튼을 눌러
+          저장된 내용을 삭제하세요.
+        </p>
+        <p>
+          향후 Google AdSense를 적용하면 Google 및 제3자 광고 사업자가 쿠키를 사용해 이전
+          방문 기록에 기반한 광고를 제공할 수 있습니다. 사용자는 Google 광고 설정에서 개인
+          맞춤 광고를 관리하거나 브라우저 설정에서 쿠키를 제어할 수 있습니다.
+        </p>
+        <p>
+          광고는 콘텐츠와 구분되도록 “광고”로 표시되며, 클릭을 유도하거나 보상을 약속하는
+          문구를 사용하지 않습니다.
+        </p>
+      </div>
+    </section>
+
+    <aside class="ad-slot bottom-ad" aria-label="하단 광고 영역">
+      <span>광고</span>
+      <strong>하단 광고 영역</strong>
+      <p>페이지 하단 콘텐츠 뒤에 배치되는 반응형 광고 자리입니다.</p>
+    </aside>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <strong>꿈해몽 노트</strong>
+        <p>꿈 기록과 자기 성찰을 위한 한국어 웹앱</p>
+      </div>
+      <div>
+        <p>문의: 배포 전 운영자 이메일을 연결해 주세요.</p>
+        <p>최종 업데이트: 2026년 6월 23일</p>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
