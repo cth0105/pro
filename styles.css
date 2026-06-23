@@ -327,6 +327,13 @@ fieldset {
   font-size: 0.92rem;
 }
 
+.field-help {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
 .empty-state {
   display: grid;
   place-content: center;

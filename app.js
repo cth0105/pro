@@ -15,6 +15,8 @@ const actionText = document.querySelector("#actionText");
 const copyButton = document.querySelector("#copyButton");
 const historyList = document.querySelector("#historyList");
 const clearHistoryButton = document.querySelector("#clearHistoryButton");
+const submitButton = document.querySelector("#submitButton");
+const engineTag = document.querySelector("#engineTag");
 
 const STORAGE_KEY = "dream-note-history";
 
@@ -45,7 +47,7 @@ const symbolBank = [
     meaning: "그 사람이 실제 인물이라기보다 내 안의 역할, 욕구, 관계 패턴을 보여줄 수 있습니다.",
   },
   {
-    keywords: ["동물", "새", "고양이", "개", "말", "뱀"],
+    keywords: ["동물", "새", "고양이", "강아지", "반려견", "말", "뱀"],
     symbol: "생명체",
     meaning: "본능, 보호받고 싶은 마음, 또는 말로 설명하기 어려운 감각이 움직이고 있을 수 있어요.",
   },
@@ -191,6 +193,11 @@ const toneLabels = {
   detail: "자세히",
   comfort: "위로형",
   practical: "현실 조언형",
+};
+
+const engineLabels = {
+  keyword: "키워드 해석",
+  ai: "AI 해석",
 };
 
 function buildSummary({ clippedDream, selectedTheme, selectedSymbols, mood, tone }) {
@@ -403,6 +410,8 @@ function interpretDream(text, mood, tone = "balanced") {
     mood,
     tone: safeTone,
     toneLabel: toneLabels[safeTone],
+    engine: "keyword",
+    engineLabel: engineLabels.keyword,
     theme: selectedTheme.name,
     title: selectedTheme.title,
     summary: buildSummary({
@@ -423,6 +432,49 @@ function interpretDream(text, mood, tone = "balanced") {
   };
 }
 
+function normalizeAiResult(interpretation, text, mood, tone) {
+  const safeTone = toneLabels[tone] ? tone : "balanced";
+  const symbols = Array.isArray(interpretation.symbols) ? interpretation.symbols : [];
+
+  return {
+    createdAt: new Date().toISOString(),
+    dream: text.replace(/\s+/g, " ").trim(),
+    mood,
+    tone: safeTone,
+    toneLabel: toneLabels[safeTone],
+    engine: "ai",
+    engineLabel: engineLabels.ai,
+    theme: String(interpretation.theme || "AI 해석").slice(0, 20),
+    title: String(interpretation.title || "꿈이 전하는 마음의 단서").slice(0, 80),
+    summary: String(interpretation.summary || "꿈의 장면과 감정을 바탕으로 해석을 정리했습니다."),
+    symbols: symbols.slice(0, 4).map((item) => ({
+      label: String(item?.label || "꿈속 단서").slice(0, 40),
+      meaning: String(item?.meaning || "이 장면이 남긴 감정을 살펴보세요."),
+    })),
+    emotion: String(interpretation.emotion || moodInterpretations[mood]),
+    question: String(interpretation.question || "이 꿈이 지금의 나에게 묻는 것은 무엇일까요?"),
+    action: String(interpretation.action || "오늘 떠오르는 감정을 짧게 기록해보세요."),
+  };
+}
+
+async function requestAiInterpretation(text, mood, tone) {
+  const response = await fetch("/.netlify/functions/interpret-dream", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ dream: text, mood, tone }),
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "AI 해석 요청에 실패했습니다.");
+  }
+
+  return normalizeAiResult(payload.interpretation, text, mood, tone);
+}
+
 function renderResult(result) {
   emptyState.classList.add("hidden");
   resultCard.classList.remove("hidden");
@@ -431,6 +483,7 @@ function renderResult(result) {
   moodTag.textContent = result.mood;
   themeTag.textContent = result.theme;
   toneTag.textContent = result.toneLabel || toneLabels[result.tone] || toneLabels.balanced;
+  engineTag.textContent = result.engineLabel || engineLabels[result.engine] || engineLabels.keyword;
   summaryTitle.textContent = result.title;
   summaryText.textContent = result.summary;
   emotionText.textContent = result.emotion;
@@ -449,6 +502,7 @@ function renderResult(result) {
     `감정: ${result.mood}`,
     `테마: ${result.theme}`,
     `해석 톤: ${toneTag.textContent}`,
+    `해석 방식: ${engineTag.textContent}`,
     result.summary,
     `질문: ${result.question}`,
     `작은 행동: ${result.action}`,
@@ -482,6 +536,10 @@ function renderHistory() {
       if (toneInput) {
         toneInput.checked = true;
       }
+      const engineInput = document.querySelector(`input[name="engine"][value="${item.engine || "keyword"}"]`);
+      if (engineInput) {
+        engineInput.checked = true;
+      }
     });
 
     const date = document.createElement("span");
@@ -512,11 +570,12 @@ function updateCount() {
 
 dreamInput.addEventListener("input", updateCount);
 
-dreamForm.addEventListener("submit", (event) => {
+dreamForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const text = dreamInput.value.trim();
   const mood = new FormData(dreamForm).get("mood");
   const tone = new FormData(dreamForm).get("tone");
+  const engine = new FormData(dreamForm).get("engine");
 
   if (text.length < 8) {
     dreamInput.focus();
@@ -526,7 +585,23 @@ dreamForm.addEventListener("submit", (event) => {
   }
 
   wordCount.style.color = "";
-  const result = interpretDream(text, mood, tone);
+  submitButton.disabled = true;
+  submitButton.textContent = engine === "ai" ? "AI 해석 중..." : "해석 중...";
+
+  let result;
+
+  try {
+    result = engine === "ai"
+      ? await requestAiInterpretation(text, mood, tone)
+      : interpretDream(text, mood, tone);
+  } catch (error) {
+    result = interpretDream(text, mood, tone);
+    result.summary = `${result.summary} AI 해석을 불러오지 못해 키워드 기반 해석으로 대신 보여드립니다.`;
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "해석하기";
+  }
+
   renderResult(result);
   setHistory([result, ...getHistory()]);
   renderHistory();
